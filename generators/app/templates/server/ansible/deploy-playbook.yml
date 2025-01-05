@@ -1,0 +1,134 @@
+# Fedora currently
+---
+- hosts: all
+  remote_user: root
+  tasks:
+    - name: Ensure docker deamon is running
+      service:
+        name: docker
+        state: started
+    - name: Ensure caddy is running
+      service:
+        name: caddy
+        state: started
+    - name: Create required directories
+      file:
+        path: "{{ item }}"
+        state: directory
+      with_items:
+        - ~/.aws
+        - /opt/app/{{ app_name }}
+        - /etc/caddy/Caddyfile.d
+        - /opt/cloudwatch-config
+    - name: Remove files to ensure clean run
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /opt/app/{{ app_name }}/env.json
+        - /opt/app/{{ app_name }}/.env
+        - /opt/app/env.json
+        - /opt/app/.env
+        - /etc/caddy/Caddyfile.d/{{ app_domain }}.caddyfile
+        - /opt/cloudwatch-config/{{ app_name }}.json
+    - name: Create required files
+      file:
+        path: "{{ item }}"
+        state: touch
+      with_items:
+        - /opt/app/{{ app_name }}/env.json
+        - /opt/app/{{ app_name }}/.env
+        - /etc/caddy/Caddyfile.d/{{ app_domain }}.caddyfile
+    - name: Copy aws credentials
+      copy:
+        src: "{{ item.src }}"
+        dest: "{{ item.dest }}"
+        owner: root
+        group: root
+        mode: 0644
+      with_items:
+        - src: .credentials
+          dest: ~/.aws/credentials
+    - name: Get SSM params and create .env file
+      shell: "{{ item }}"
+      with_items:
+        - aws ssm get-parameters-by-path --with-decryption --path /{{ app_name }} --query "Parameters[*].{Name:Name,Value:Value}" | sed 's,'"/{{ app_name }}/"',,' > /opt/app/{{ app_name }}/env.json
+        - jq -jr '.[]|.Name,"=\"",.Value,"\"\n"' < /opt/app/{{ app_name }}/env.json >> /opt/app/{{ app_name }}/.env
+    - name: Get ECR token
+      shell: "aws ecr get-login-password --region eu-west-2"
+      register: ecr_token
+    - name: Log into ECR registry
+      docker_login:
+        registry_url: "{{ ecr_repo }}"
+        debug: yes
+        username: "AWS"
+        password: "{{ ecr_token.stdout }}"
+        reauthorize: yes
+    - name: Pull docker image
+      command: docker pull {{ ecr_repo }}/{{ image_name }}:latest
+    - name: Stop existing docker container, if it exists
+      command: docker stop {{ app_name }}
+      ignore_errors: true
+    - name: Remove existing docker container, if it exists
+      command: docker remove --force {{ app_name }}
+      ignore_errors: true
+    - name: Run docker container
+      command: docker run --name {{ app_name }} --restart=always -d -p {{ app_port }}:9000 -v /opt/app/{{ app_name }}/.env:/usr/app/.env:ro {{ ecr_repo }}/{{ image_name }}:latest
+    - name: Remove sensitive env var files from server
+      file:
+        path: "{{ item }}"
+        state: absent
+      with_items:
+        - /opt/app/{{ app_name }}/env.json
+    - name: Create caddy file site block file
+      copy:
+        dest: /etc/caddy/Caddyfile.d/{{ app_domain }}.caddyfile
+        content: |
+          {{ app_domain }} {
+            reverse_proxy :{{ app_port }}
+            log {
+              output file /var/log/caddy/{{ app_name }}.log
+              format json
+            }
+            @exploits {
+              path /cms/license.txt
+              path /wp-login.php
+              path /w/license.txt
+              path /2/license.txt
+              path /test/web.config.txt
+              path /vendor/phpunit/phpunit/LICENSE
+              path /vendor/phpunit/phpunit/src/Util/PHP/Template/TestCaseMethod.tpl.dist
+              path /res/license.txt
+              path /backup/license.txt
+              path /back/license.txt
+              path /_wp/license.txt
+              path /.env
+              path /*.php
+            }
+            respond @exploits 404
+          }
+    - name: Reload caddy file
+      command: systemctl restart caddy
+    - name: Create cloudwatch app config file
+      copy:
+        dest: /opt/cloudwatch-config/{{ app_name }}.json
+        content: |
+          {
+            "logs": {
+              "logs_collected": {
+                "files": {
+                  "collect_list": [
+                    {
+                      "file_path": "/var/log/caddy/{{ app_name }}.log",
+                      "log_group_class": "STANDARD",
+                      "log_group_name": "{{ app_name }}",
+                      "log_stream_name": "{{ app_name }}",
+                      "retention_in_days": {{ log_retention_days }}
+                    }
+                  ]
+                }
+              }
+            }
+          }
+    - name: Add app config to cloudwatch and run
+      command: /opt/aws/amazon-cloudwatch-agent/bin/amazon-cloudwatch-agent-ctl -a append-config -m onPremise -s -c file:/opt/cloudwatch-config/{{ app_name }}.json

@@ -1,0 +1,18 @@
+testDomain: localhost:443
+sandboxDomain: # e.g. sandbox.my-big-idea.com - domain for the sandbox environment client, which must already have an AWS certificate issued in region us-east-1
+prodDomain: # e.g. www.my-big-idea.com - domain for prod client, which must already have an AWS certificate issued in region us-east-1
+cognitoUserPoolIdLocal: # e.g. eu-west-2_ABCD12efG
+cognitoUserPoolClientIdLocal: # e.g. 3afasfdsafsd32236adfdsaf67
+cognitoDomainLocal: # e.g. https://custom-domain-name.auth.eu-west-2.amazoncognito.com - MUST already exist
+cognitoUserPoolIdTest:
+cognitoUserPoolClientIdTest:
+cognitoDomainTest:
+cognitoUserPoolIdSandbox:
+cognitoUserPoolClientIdSandbox:
+cognitoDomainSandbox:
+cognitoUserPoolIdProd:
+cognitoUserPoolClientIdProd:
+cognitoDomainProd:
+dbConnectionStringLocal: "postgres://user:password@localhost:5432/dbname" # PostGres database connection string for local development
+dbConnectionStringLocalDocker: "postgres://user:password@host.docker.internal:5432/dbname" # DB string for local-docker development
+dbConnectionStringTest: "postgres://user:password@localhost:5432/dbname" # DB string for test development

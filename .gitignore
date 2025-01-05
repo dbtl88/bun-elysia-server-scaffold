@@ -1,0 +1,7 @@
+node_modules
+# You definitely don't want to be committing your hosts file, if you're using a separate one here
+**/.hosts.ini
+
+# Make SUPER SURE your actual configs with sensitive values are not committed, per below
+generators/app/config-actual.yml
+generators/cognito/config-actual.yml

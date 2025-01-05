@@ -1,0 +1,8 @@
+projectName: appName
+githubUser:
+ecrRepo: # ECR repository for storing docker images (without image name)
+imageName: # Repo with this image name must already exist in ECR
+appRepo: #GitHub repository name (repo must NOT already exist) for storing the server project source
+dbConnectionStringLocal: "postgres://user:password@localhost:5432/dbname" # PostGres database connection string for local development
+dbConnectionStringLocalDocker: "postgres://user:password@host.docker.internal:5432/dbname" # DB string for local-docker development
+dbConnectionStringTest: "postgres://user:password@localhost:5432/dbname" # DB string for test development

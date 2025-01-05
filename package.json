@@ -1,0 +1,19 @@
+{
+  "name": "generator-bun-elysia",
+  "version": "0.1.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "author": "Dominic L",
+  "license": "Apache License 2.0",
+  "description": "Yeoman based generator for scaffolding a Bun/ElysiaJS server app, including an AWS CodePipeline via AWS CDK to build the app and push the resulting docker image to Elastic Container Registry (ECR), and including an example ansible script for deploying the app to a third party Virtual Private Server.",
+  "dependencies": {
+    "js-yaml": "^4.1.0",
+    "yeoman-generator": "^7.3.3"
+  },
+  "type": "module"
+}

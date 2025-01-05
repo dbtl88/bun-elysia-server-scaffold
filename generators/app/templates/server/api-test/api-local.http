@@ -1,0 +1,15 @@
+@url = http://localhost:443
+
+###
+GET {{url}}
+
+###
+GET {{url}}/record
+
+###
+POST {{url}}/record
+content-type: application/json
+
+{
+  "description": "This is a sample record"
+}
