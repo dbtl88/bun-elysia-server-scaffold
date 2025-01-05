@@ -1,5 +1,5 @@
 {
-  "name": "generator-bun-elysia",
+  "name": "generator-bun-elysia-server",
   "version": "0.1.0",
   "main": "index.js",
   "scripts": {

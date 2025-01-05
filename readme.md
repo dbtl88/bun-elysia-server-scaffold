@@ -40,8 +40,8 @@ I provide no guarantees for this project. It's just supposed to be a demonstrati
 
 ## Steps for app creation
 
-1. Run `yo bun-elysia`. You will need to provide the filename of the config file you prepared. Note that the generator will create a folder 'appname' per your provided app name in the your config file, and sub-folders 'appname-server', 'appname-pipeline-server', and 'dev-proxy'.
-2. To add cognito (including user table on database) cognito, run `yo bun-elysia:cognito` _from the generated 'appname-server' directory_. DO NOT run it from your starting directory.
+1. Run `yo bun-elysia-server`. You will need to provide the filename of the config file you prepared. Note that the generator will create a folder 'appname' per your provided app name in the your config file, and sub-folders 'appname-server', 'appname-pipeline-server', and 'dev-proxy'.
+2. To add cognito (including user table on database) cognito, run `yo bun-elysia-server:cognito` _from the generated 'appname-server' directory_. DO NOT run it from your starting directory.
 3. To deploy the app using the provided ansible script (NB caveats above about VPS setup and hosts file), from the main 'appname-server' directory run `ansible-playbook ansible/deploy-playbook.yml -i ansible/.hosts.ini --extra-vars "@ansible/env-test-vars.yml" --limit your-host-name`. NOTE: You will need to adapt env-test-vars.yml accordingly for each environment you deploy, and replace your-host-name with whatever alias you have given your server in your hosts file.
 
 ## Commands to run the app
