@@ -22,7 +22,7 @@ I provide no guarantees for this project. It's just supposed to be a demonstrati
 
 ## Outstanding to-dos
 
-- URGENT: Fix problem with auth cookies currently broken - cookies are set for the domain, but need to be valid for other subdomains too, as my approach for the server API is to use a subdomain.
+- ~~URGENT: Fix problem with auth cookies currently broken - cookies are set for the domain, but need to be valid for other subdomains too, as my approach for the server API is to use a subdomain.~~
 - Make unit tests run in CodePipeline
 - Improve idempotency and checks for correct starting folder when using sub-generators
 - Lots of little niggles.
