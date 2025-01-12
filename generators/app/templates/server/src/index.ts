@@ -1,5 +1,4 @@
 import { Elysia } from "elysia";
-import { cors } from "@elysiajs/cors";
 import controllers from "../src/controllers.json";
 
 const port = () => {
@@ -17,7 +16,7 @@ const port = () => {
 // use json of objects in separate file, then extend this, then map
 
 export const initialiseApp = async () => {
-  const app = new Elysia().use(cors());
+  const app = new Elysia({ prefix: "/api" });
 
   for (const controllerPath of controllers) {
     try {

@@ -4,6 +4,7 @@ import {
   cognitoTokenCallBody,
   cognitoRefreshCallBody,
 } from "../utility/globals";
+import { Cookie } from "elysia";
 
 interface AuthObject {
   id_token: string;
@@ -30,6 +31,7 @@ export async function getTokens(code: string): Promise<AuthObject> {
     body: cognitoTokenCallBody(code),
   });
   const auth = (await response.json()) as AuthObject;
+  console.log(`Cognito tokens endpoint response: ${JSON.stringify(auth)}`);
   return auth;
 }
 
@@ -57,20 +59,45 @@ export async function checkAndRefreshTokens(tokens: Tokens): Promise<Tokens> {
   return currentTokens;
 }
 
-/* eslint-disable @typescript-eslint/no-explicit-any */
-export function setTokens(ctx: any, tokens: Tokens) {
-  ctx.cookie.access_token.httpOnly = true;
-  ctx.cookie.access_token.value = tokens.access_token;
-  ctx.cookie.refresh_token.httpOnly = true;
-  ctx.cookie.refresh_token.value = tokens.refresh_token;
+export function setAuthCookies(
+  access_cookie: Cookie<string | undefined>,
+  refresh_cookie: Cookie<string | undefined>,
+  tokens: Tokens,
+  path: string
+) {
+  setCookie(access_cookie, tokens.access_token, path, 3600);
+  setCookie(refresh_cookie, tokens.refresh_token, path, 3600 * 24 * 30);
+}
+
+export function unsetCookies(
+  cookies: Cookie<string | undefined>[],
+  path: string
+) {
+  cookies.forEach((cookie) => {
+    cookie.path = path;
+    cookie.remove();
+  });
+}
+
+export function setCookie(
+  cookie: Cookie<string | undefined>,
+  value: string,
+  path: string,
+  maxAge: number
+) {
+  cookie.value = value;
+  cookie.maxAge = maxAge;
+  cookie.path = path;
+  cookie.httpOnly = true;
   if (
     process.env.NODE_ENV == "local" ||
     process.env.NODE_ENV == "local-docker"
   ) {
-    ctx.cookie.access_token.secure = false;
-    ctx.cookie.refresh_token.secure = false;
-    ctx.cookie.access_token.path = "/api";
-    ctx.cookie.refresh_token.path = "/api";
+    cookie.secure = false;
+    cookie.secure = false;
+  } else {
+    cookie.secure = true;
+    cookie.secure = true;
   }
+  cookie.sameSite = "strict";
 }
-/* eslint-enable @typescript-eslint/no-explicit-any */

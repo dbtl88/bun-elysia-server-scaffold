@@ -5,7 +5,7 @@ describe("Elysia", () => {
   it("returns a 200 status on GET /", async () => {
     const app = await initialiseApp();
 
-    const response = await app.handle(new Request("http://localhost/"));
+    const response = await app.handle(new Request("http://localhost/api"));
     const json = await response.json();
     expect(response.status).toBe(200);
     expect(json.answer).toBe("okay");
@@ -15,7 +15,7 @@ describe("Elysia", () => {
     const app = await initialiseApp();
 
     const response = await app.handle(
-      new Request("http://localhost/record", {
+      new Request("http://localhost/api/record", {
         method: "POST",
         headers: [["content-type", "application/json"]],
         body: JSON.stringify({

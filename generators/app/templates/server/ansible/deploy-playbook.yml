@@ -85,11 +85,9 @@
         dest: /etc/caddy/Caddyfile.d/{{ app_domain }}.caddyfile
         content: |
           {{ app_domain }} {
-            reverse_proxy :{{ app_port }}
-            log {
-              output file /var/log/caddy/{{ app_name }}.log
-              format json
-            }
+            @missingSecretHeader not header X-Secret-CloudFront {{ secret_header_value }}
+            respond @missingSecretHeader 403
+            
             @exploits {
               path /cms/license.txt
               path /wp-login.php
@@ -105,7 +103,13 @@
               path /.env
               path /*.php
             }
-            respond @exploits 404
+            respond @exploits 403
+
+            reverse_proxy :{{ app_port }}
+            log {
+              output file /var/log/caddy/{{ app_name }}.log
+              format json
+            }
           }
     - name: Reload caddy file
       command: systemctl restart caddy

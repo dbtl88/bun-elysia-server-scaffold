@@ -5,3 +5,4 @@ ecr_repo: <%=ecrRepo%>
 app_port: 9000
 app_domain: // replace with your api domain, which already has DNS pointed at the server
 log_retention_days: 30
+secret_header_value: PLACEHOLDER_VALUE
